@@ -1,5 +1,10 @@
 package com.kaptanas.simpleweather;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -7,63 +12,66 @@ import java.util.TimeZone;
 /**
  * Created by benjakuben on 12/8/14.
  */
-public class CurrentWeather {
-    private String mIcon;
-    private long mTime;
-    private double mTemperature;
-    private double mHumidity;
-    private double mPrecipChance;
-    private String mSummary;
-    private String mTimeZone;
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(value = JsonInclude.Include.NON_NULL)
+public class CurrentWeather implements Serializable{
+    private static final long serialVersionUID = -1605895563223329936L;
+    private String icon;
+    private long time;
+    private double temperature;
+    private double humidity;
+    private double precipProbability;
+    private String timeZone;
+
 
     public String getTimeZone() {
-        return mTimeZone;
+        return timeZone;
     }
 
     public void setTimeZone(String timeZone) {
-        mTimeZone = timeZone;
+        this.timeZone = timeZone;
     }
 
     public String getIcon() {
-        return mIcon;
+        return icon;
     }
 
     public void setIcon(String icon) {
-        mIcon = icon;
+        this.icon = icon;
     }
 
     public int getIconId() {
         // clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night.
         int iconId = R.drawable.clear_day;
 
-        if (mIcon.equals("clear-day")) {
+        if (icon.equals("clear-day")) {
             iconId = R.drawable.clear_day;
         }
-        else if (mIcon.equals("clear-night")) {
+        else if (icon.equals("clear-night")) {
             iconId = R.drawable.clear_night;
         }
-        else if (mIcon.equals("rain")) {
+        else if (icon.equals("rain")) {
             iconId = R.drawable.rain;
         }
-        else if (mIcon.equals("snow")) {
+        else if (icon.equals("snow")) {
             iconId = R.drawable.snow;
         }
-        else if (mIcon.equals("sleet")) {
+        else if (icon.equals("sleet")) {
             iconId = R.drawable.sleet;
         }
-        else if (mIcon.equals("wind")) {
+        else if (icon.equals("wind")) {
             iconId = R.drawable.wind;
         }
-        else if (mIcon.equals("fog")) {
+        else if (icon.equals("fog")) {
             iconId = R.drawable.fog;
         }
-        else if (mIcon.equals("cloudy")) {
+        else if (icon.equals("cloudy")) {
             iconId = R.drawable.cloudy;
         }
-        else if (mIcon.equals("partly-cloudy-day")) {
+        else if (icon.equals("partly-cloudy-day")) {
             iconId = R.drawable.partly_cloudy;
         }
-        else if (mIcon.equals("partly-cloudy-night")) {
+        else if (icon.equals("partly-cloudy-night")) {
             iconId = R.drawable.cloudy_night;
         }
 
@@ -71,7 +79,7 @@ public class CurrentWeather {
     }
 
     public long getTime() {
-        return mTime;
+        return time;
     }
 
     public String getFormattedTime() {
@@ -79,44 +87,40 @@ public class CurrentWeather {
         formatter.setTimeZone(TimeZone.getTimeZone(getTimeZone()));
         Date dateTime = new Date(getTime() * 1000);
         String timeString = formatter.format(dateTime);
-
         return timeString;
     }
 
     public void setTime(long time) {
-        mTime = time;
+        this.time = time;
     }
 
-    public int getTemperature() {
-        return (int)Math.round(mTemperature);
+    public double getTemperature() {
+        return temperature;
     }
 
     public void setTemperature(double temperature) {
-        mTemperature = temperature;
+        this.temperature = temperature;
     }
 
     public double getHumidity() {
-        return mHumidity;
+        return humidity;
     }
 
     public void setHumidity(double humidity) {
-        mHumidity = humidity;
+        this.humidity = humidity;
     }
 
-    public int getPrecipChance() {
-        double precipPercentage = mPrecipChance * 100;
+    public int getPrecipProbability() {
+        double precipPercentage = precipProbability * 100;
         return (int)Math.round(precipPercentage);
     }
 
-    public void setPrecipChance(double precipChance) {
-        mPrecipChance = precipChance;
+    public void setPrecipProbability(double precipProbability) {
+        this.precipProbability = precipProbability;
     }
 
-    public String getSummary() {
-        return mSummary;
+    public int getCelcius(){
+        return (int)Math.round(((getTemperature() - 32)*5)/9);
     }
 
-    public void setSummary(String summary) {
-        mSummary = summary;
-    }
 }

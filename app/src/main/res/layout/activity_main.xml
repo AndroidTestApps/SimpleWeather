@@ -37,7 +37,7 @@
         android:layout_above="@+id/degreeImageView"
         android:layout_centerHorizontal="true"
         android:textColor="#80ffffff"
-        android:textSize="18sp"/>
+        android:textSize="24sp"/>
 
     <TextView
         android:layout_width="wrap_content"
@@ -118,17 +118,6 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Getting current weather..."
-        android:id="@+id/summaryLabel"
-        android:layout_below="@+id/linearLayout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:textColor="@android:color/white"
-        android:textSize="18dp"
-        android:gravity="center_horizontal"/>
 
     <ImageView
         android:layout_width="wrap_content"
