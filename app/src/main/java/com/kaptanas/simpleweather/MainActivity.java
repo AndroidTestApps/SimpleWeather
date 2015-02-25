@@ -33,10 +33,8 @@ public class MainActivity extends Activity {
     @InjectView(R.id.locationLabel)
     TextView mLocationLabel;
 
-    private CurrentWeather currentWeather;
     private Location mCurrentLocation;
     WeatherService weatherService;
-    AddressService mAddressService;
     Double latitude, longitude;
     List<Address> addresses = null;
 
@@ -71,24 +69,32 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        setLocation();
         setWeatherAdapter();
-        latitude = mCurrentLocation.getLatitude();
-        longitude = mCurrentLocation.getLongitude();
-        getAddresses(latitude, longitude);
 
-        setUI();
-
+        setUiWithDatas();
 
         mRefreshImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                setUI();
+                setUiWithDatas();
             }
         });
 
     }
+
+    private void setUiWithDatas() {
+        setLocation();
+        if(mCurrentLocation != null && isNetworkAvailable()) {
+            latitude = mCurrentLocation.getLatitude();
+            longitude = mCurrentLocation.getLongitude();
+            getAddresses(latitude, longitude);
+            setUI();
+        }else{
+
+            alertUserAboutError();
+        }
+    }
+
 
     private void setUI() {
         toggleRefresh();
@@ -120,10 +126,11 @@ public class MainActivity extends Activity {
     private void setLocation() {
         LocationManager manager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         boolean isGpsEnabled = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        boolean isNetworkEnabled = manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        if (isGpsEnabled && !isNetworkEnabled) {
+        if (isGpsEnabled) {
             mCurrentLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        } else {
+            if(mCurrentLocation == null)
+                mCurrentLocation = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        } else{
             mCurrentLocation = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
     }
@@ -185,13 +192,7 @@ public class MainActivity extends Activity {
         weatherService = restAdapter.create(WeatherService.class);
     }
 
-    private void setAdressAdapter() {
-        RestAdapter adapter = new RestAdapter.Builder()
-                .setEndpoint("http://maps.google.com/maps/api/geocode")
-                .build();
 
-        mAddressService = adapter.create(AddressService.class);
-    }
 
 }
 
