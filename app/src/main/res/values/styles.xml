@@ -3,6 +3,10 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
+        #FF9300
+        <item name="md_positive_color">#FF9300</item>
+        <item name="md_negative_color">#FF9300</item>
+        <item name="md_neutral_color">#FF9300</item>
     </style>
 
 </resources>
