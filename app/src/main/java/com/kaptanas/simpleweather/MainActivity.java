@@ -2,6 +2,7 @@ package com.kaptanas.simpleweather;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
@@ -10,10 +11,13 @@ import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.io.IOException;
 import java.util.List;
@@ -90,8 +94,11 @@ public class MainActivity extends Activity {
             getAddresses(latitude, longitude);
             setUI();
         }else{
-
-            alertUserAboutError();
+            if(!isNetworkAvailable()){
+                showMaterialDialogNetwork();
+            }else if(mCurrentLocation == null)
+                showMaterialDialogLocation();
+           // alertUserAboutError();
         }
     }
 
@@ -192,6 +199,65 @@ public class MainActivity extends Activity {
         weatherService = restAdapter.create(WeatherService.class);
     }
 
+
+    private void showMaterialDialogNetwork(){
+
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                       .title("Opss , Sorry!")
+                       .content("Please check network settings.")
+                       .positiveText("Wifi ")
+                       .negativeText("Mobile")
+                       .neutralText("Cancel")
+                       .autoDismiss(true);
+                       builder.callback(new MaterialDialog.ButtonCallback() {
+                           @Override
+                           public void onPositive(MaterialDialog dialog) {
+                               super.onPositive(dialog);
+                               startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+
+                           }
+
+                           @Override
+                           public void onNegative(MaterialDialog dialog) {
+                               super.onNegative(dialog);
+//                               startActivityForResult(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS),0);
+                               startActivityForResult(new Intent(android.provider.Settings.ACTION_DATA_ROAMING_SETTINGS), 0);
+                           }
+
+                           @Override
+                           public void onNeutral(MaterialDialog dialog) {
+                               super.onNeutral(dialog);
+
+                           }
+                       });
+                       builder.show();
+
+    }
+
+    private void showMaterialDialogLocation(){
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title("Opss , Sorry!")
+                .content("Please check Location and GPS settings.")
+                .positiveText("Location Settings")
+                .negativeText("Cancel")
+                .autoDismiss(true);
+        builder.callback(new MaterialDialog.ButtonCallback() {
+            @Override
+            public void onPositive(MaterialDialog dialog) {
+                super.onPositive(dialog);
+                startActivityForResult(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS), 0);
+
+            }
+
+            @Override
+            public void onNegative(MaterialDialog dialog) {
+                super.onNegative(dialog);
+            }
+
+
+        });
+        builder.show();
+    }
 
 
 }
