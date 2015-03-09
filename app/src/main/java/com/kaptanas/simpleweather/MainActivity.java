@@ -13,11 +13,16 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.kaptanas.simpleweather.fragment.AlertDialogFragment;
+import com.kaptanas.simpleweather.model.Current;
+import com.kaptanas.simpleweather.model.Forecast;
+import com.kaptanas.simpleweather.services.WeatherService;
 
 import java.io.IOException;
 import java.util.List;
@@ -25,6 +30,7 @@ import java.util.Locale;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -36,6 +42,10 @@ public class MainActivity extends Activity {
     public static final String TAG = MainActivity.class.getSimpleName();
     @InjectView(R.id.locationLabel)
     TextView mLocationLabel;
+    @InjectView(R.id.hourlyButton)
+    Button mHourlyButton;
+    @InjectView(R.id.dailyButton)
+    Button mDailyButton;
 
     private Location mCurrentLocation;
     WeatherService weatherService;
@@ -56,6 +66,16 @@ public class MainActivity extends Activity {
     ImageView mRefreshImageView;
     @InjectView(R.id.progressBar)
     ProgressBar mProgressBar;
+    private Intent mIntent;
+    private Forecast mForecast;
+
+    public Forecast getForecast() {
+        return mForecast;
+    }
+
+    public void setForecast(Forecast forecast) {
+        mForecast = forecast;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,9 +83,6 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         ButterKnife.inject(this);
         mProgressBar.setVisibility(View.INVISIBLE);
-
-
-
 
 
     }
@@ -88,29 +105,30 @@ public class MainActivity extends Activity {
 
     private void setUiWithDatas() {
         setLocation();
-        if(mCurrentLocation != null && isNetworkAvailable()) {
+        if (mCurrentLocation != null && isNetworkAvailable()) {
             latitude = mCurrentLocation.getLatitude();
             longitude = mCurrentLocation.getLongitude();
             getAddresses(latitude, longitude);
             setUI();
-        }else{
-            if(!isNetworkAvailable()){
+        } else {
+            if (!isNetworkAvailable()) {
                 showMaterialDialogNetwork();
-            }else if(mCurrentLocation == null)
+            } else if (mCurrentLocation == null)
                 showMaterialDialogLocation();
-           // alertUserAboutError();
+            // alertUserAboutError();
         }
     }
 
 
     private void setUI() {
         toggleRefresh();
-        weatherService.getCurrentWeather(mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", new Callback<CurrentlyResponse>() {
+        weatherService.getCurrentWeather(mCurrentLocation.getLatitude() + "", mCurrentLocation.getLongitude() + "", new Callback<Forecast>() {
             @Override
-            public void success(CurrentlyResponse currentlyResponse, Response response) {
-                CurrentWeather currentWeather = currentlyResponse.getCurrently();
-                currentWeather.setTimeZone(currentlyResponse.getTimezone());
-                updateDisplay(currentWeather);
+            public void success(Forecast forecast, Response response) {
+                setForecast(forecast);
+                Current current = forecast.getCurrently();
+                current.setTimeZone(forecast.getTimezone());
+                updateDisplay(current);
             }
 
             @Override
@@ -135,13 +153,12 @@ public class MainActivity extends Activity {
         boolean isGpsEnabled = manager.isProviderEnabled(LocationManager.GPS_PROVIDER);
         if (isGpsEnabled) {
             mCurrentLocation = manager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(mCurrentLocation == null)
+            if (mCurrentLocation == null)
                 mCurrentLocation = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        } else{
+        } else {
             mCurrentLocation = manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
     }
-
 
 
     private void toggleRefresh() {
@@ -154,19 +171,19 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void updateDisplay(CurrentWeather currentWeather) {
+    private void updateDisplay(Current current) {
         toggleRefresh();
-        mTemperatureLabel.setText(currentWeather.getCelcius() + "");
-        mTimeLabel.setText("At " + currentWeather.getFormattedTime() + " it will be");
-        mHumidityValue.setText(currentWeather.getHumidity() + "");
-        mPrecipValue.setText(currentWeather.getPrecipProbability() + "%");
-        if (addresses.size() > 0) {
+        mTemperatureLabel.setText(current.getCelcius() + "");
+        mTimeLabel.setText("At " + current.getFormattedTime() + " it will be");
+        mHumidityValue.setText(current.getHumidity() + "");
+        mPrecipValue.setText(current.getPrecipProbability() + "%");
+        if (addresses != null && addresses.size() > 0) {
             mLocationLabel.setText(addresses.get(0).getAddressLine(0));
         } else {
             mLocationLabel.setText("--");
         }
 
-        Drawable drawable = getResources().getDrawable(currentWeather.getIconId());
+        Drawable drawable = getResources().getDrawable(current.getIconId());
         mIconImageView.setImageDrawable(drawable);
 
 
@@ -200,41 +217,41 @@ public class MainActivity extends Activity {
     }
 
 
-    private void showMaterialDialogNetwork(){
+    private void showMaterialDialogNetwork() {
 
         MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
-                       .title("Opss , Sorry!")
-                       .content("Please check network settings.")
-                       .positiveText("Wifi ")
-                       .negativeText("Mobile")
-                       .neutralText("Cancel")
-                       .autoDismiss(true);
-                       builder.callback(new MaterialDialog.ButtonCallback() {
-                           @Override
-                           public void onPositive(MaterialDialog dialog) {
-                               super.onPositive(dialog);
-                               startActivityForResult(new Intent(android.provider.Settings.ACTION_SETTINGS), 0);
+                .title("Opss , Sorry!")
+                .content("Please check network settings.")
+                .positiveText("Wifi ")
+                .negativeText("Mobile")
+                .neutralText("Cancel")
+                .autoDismiss(true);
+        builder.callback(new MaterialDialog.ButtonCallback() {
+            @Override
+            public void onPositive(MaterialDialog dialog) {
+                super.onPositive(dialog);
+                startActivityForResult(new Intent(Settings.ACTION_SETTINGS), 0);
 
-                           }
+            }
 
-                           @Override
-                           public void onNegative(MaterialDialog dialog) {
-                               super.onNegative(dialog);
+            @Override
+            public void onNegative(MaterialDialog dialog) {
+                super.onNegative(dialog);
 //                               startActivityForResult(new Intent(android.provider.Settings.ACTION_WIRELESS_SETTINGS),0);
-                               startActivityForResult(new Intent(android.provider.Settings.ACTION_DATA_ROAMING_SETTINGS), 0);
-                           }
+                startActivityForResult(new Intent(Settings.ACTION_DATA_ROAMING_SETTINGS), 0);
+            }
 
-                           @Override
-                           public void onNeutral(MaterialDialog dialog) {
-                               super.onNeutral(dialog);
+            @Override
+            public void onNeutral(MaterialDialog dialog) {
+                super.onNeutral(dialog);
 
-                           }
-                       });
-                       builder.show();
+            }
+        });
+        builder.show();
 
     }
 
-    private void showMaterialDialogLocation(){
+    private void showMaterialDialogLocation() {
         MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
                 .title("Opss , Sorry!")
                 .content("Please check Location and GPS settings.")
@@ -259,7 +276,12 @@ public class MainActivity extends Activity {
         builder.show();
     }
 
-
+    @OnClick(R.id.dailyButton)
+    public void dailyActivity(View v){
+        mIntent = new Intent(this,DailyForecastActivity.class);
+        mIntent.putExtra("forecast",getForecast());
+        startActivity(mIntent);
+    }
 }
 
 

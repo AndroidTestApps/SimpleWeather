@@ -1,4 +1,4 @@
-package com.kaptanas.simpleweather;
+package com.kaptanas.simpleweather.services;
 
 import retrofit.http.GET;
 import retrofit.http.Query;

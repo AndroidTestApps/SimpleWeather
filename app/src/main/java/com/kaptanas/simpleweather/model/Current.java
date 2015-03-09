@@ -1,4 +1,4 @@
-package com.kaptanas.simpleweather;
+package com.kaptanas.simpleweather.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -14,7 +14,7 @@ import java.util.TimeZone;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(value = JsonInclude.Include.NON_NULL)
-public class CurrentWeather implements Serializable{
+public class Current implements Serializable{
     private static final long serialVersionUID = -1605895563223329936L;
     private String icon;
     private long time;
@@ -42,40 +42,8 @@ public class CurrentWeather implements Serializable{
 
     public int getIconId() {
         // clear-day, clear-night, rain, snow, sleet, wind, fog, cloudy, partly-cloudy-day, or partly-cloudy-night.
-        int iconId = R.drawable.clear_day;
 
-        if (icon.equals("clear-day")) {
-            iconId = R.drawable.clear_day;
-        }
-        else if (icon.equals("clear-night")) {
-            iconId = R.drawable.clear_night;
-        }
-        else if (icon.equals("rain")) {
-            iconId = R.drawable.rain;
-        }
-        else if (icon.equals("snow")) {
-            iconId = R.drawable.snow;
-        }
-        else if (icon.equals("sleet")) {
-            iconId = R.drawable.sleet;
-        }
-        else if (icon.equals("wind")) {
-            iconId = R.drawable.wind;
-        }
-        else if (icon.equals("fog")) {
-            iconId = R.drawable.fog;
-        }
-        else if (icon.equals("cloudy")) {
-            iconId = R.drawable.cloudy;
-        }
-        else if (icon.equals("partly-cloudy-day")) {
-            iconId = R.drawable.partly_cloudy;
-        }
-        else if (icon.equals("partly-cloudy-night")) {
-            iconId = R.drawable.cloudy_night;
-        }
-
-        return iconId;
+        return Forecast.getIcon(icon);
     }
 
     public long getTime() {

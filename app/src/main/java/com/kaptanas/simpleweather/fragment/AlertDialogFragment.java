@@ -1,10 +1,12 @@
-package com.kaptanas.simpleweather;
+package com.kaptanas.simpleweather.fragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
+
+import com.kaptanas.simpleweather.R;
 
 /**
  * Created by benjakuben on 12/3/14.
