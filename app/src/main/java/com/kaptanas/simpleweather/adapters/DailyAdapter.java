@@ -9,27 +9,27 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.kaptanas.simpleweather.R;
-import com.kaptanas.simpleweather.model.DailyResponse;
 import com.kaptanas.simpleweather.model.Day;
+import com.kaptanas.simpleweather.model.Forecast;
 
 /**
  * Created by cihankaptan on 09/03/15.
  */
 public class DailyAdapter extends BaseAdapter {
     Activity mActivity;
-    DailyResponse mDailyResponse;
-    public DailyAdapter(Activity activity,DailyResponse dailyResponse){
+    Forecast forecast;
+    public DailyAdapter(Activity activity,Forecast forecast){
         mActivity=activity;
-        mDailyResponse = dailyResponse;
+        this.forecast = forecast;
     }
     @Override
     public int getCount() {
-        return mDailyResponse.getData().size();
+        return forecast.getDaily().getData().size();
     }
 
     @Override
     public Object getItem(int position) {
-        return mDailyResponse.getData().get(position);
+        return forecast.getDaily().getData().get(position);
     }
 
     @Override
@@ -52,10 +52,10 @@ public class DailyAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-        Day day = mDailyResponse.getData().get(position);
+        Day day = forecast.getDaily().getData().get(position);
         holder.iconLabel.setImageResource(day.getIconId());
-        holder.temperatureLabel.setText(day.getTemperatureMax()+"");
-     //   holder.dayLabel.setText(day.getDayOfTheWeek());
+        holder.temperatureLabel.setText(day.getCelcius()+"");
+        holder.dayLabel.setText(day.getDayOfTheWeek(forecast.getTimezone()));
         return convertView;
     }
 

@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -19,6 +20,9 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.afollestad.materialdialogs.MaterialDialog;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationServices;
 import com.kaptanas.simpleweather.fragment.AlertDialogFragment;
 import com.kaptanas.simpleweather.model.Current;
 import com.kaptanas.simpleweather.model.Forecast;
@@ -37,7 +41,9 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity  implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener  {
 
     public static final String TAG = MainActivity.class.getSimpleName();
     @InjectView(R.id.locationLabel)
@@ -51,6 +57,7 @@ public class MainActivity extends Activity {
     WeatherService weatherService;
     Double latitude, longitude;
     List<Address> addresses = null;
+    private GoogleApiClient mGoogleApiClient;
 
     @InjectView(R.id.timeLabel)
     TextView mTimeLabel;
@@ -84,6 +91,12 @@ public class MainActivity extends Activity {
         ButterKnife.inject(this);
         mProgressBar.setVisibility(View.INVISIBLE);
 
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+
 
     }
 
@@ -101,6 +114,21 @@ public class MainActivity extends Activity {
             }
         });
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mGoogleApiClient.connect();
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mGoogleApiClient.isConnected()) {
+            mGoogleApiClient.disconnect();
+        }
     }
 
     private void setUiWithDatas() {
@@ -281,6 +309,29 @@ public class MainActivity extends Activity {
         mIntent = new Intent(this,DailyForecastActivity.class);
         mIntent.putExtra("forecast",getForecast());
         startActivity(mIntent);
+    }
+
+    @OnClick(R.id.hourlyButton)
+    public void hourlyActivity(View v){
+        mIntent = new Intent(this, HourlyForecastActivity.class);
+        mIntent.putExtra("forecast",getForecast());
+        startActivity(mIntent);
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.i(TAG, "Location services connected.");
+        mCurrentLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.i(TAG, "Location services suspended. Please reconnect.");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+
     }
 }
 

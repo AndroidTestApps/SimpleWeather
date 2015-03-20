@@ -16,7 +16,7 @@ public class DailyForecastActivity extends ListActivity {
 
         mForecast=(Forecast)getIntent().getSerializableExtra("forecast");
        if(mForecast!=null){
-           DailyAdapter dailyAdapter = new DailyAdapter(this,mForecast.getDaily());
+           DailyAdapter dailyAdapter = new DailyAdapter(this,mForecast);
            setListAdapter(dailyAdapter);
        }
 

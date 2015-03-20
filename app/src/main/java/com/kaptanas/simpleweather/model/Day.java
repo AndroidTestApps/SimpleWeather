@@ -61,19 +61,14 @@ public class Day implements Serializable {
         this.icon = icon;
     }
 
-    public String getTimezone() {
-        return timezone;
+    public int getCelcius(){
+        return (int)Math.round(((getTemperatureMax() - 32)*5)/9);
     }
-
-    public void setTimezone(String timezone) {
-        this.timezone = timezone;
-    }
-
     public int getIconId(){
         return Forecast.getIcon(icon);
     }
 
-    public String getDayOfTheWeek() {
+    public String getDayOfTheWeek(String timezone) {
         SimpleDateFormat formatter = new SimpleDateFormat("EEEE");
         formatter.setTimeZone(TimeZone.getTimeZone(timezone));
         Date dateTime = new Date(time * 1000);
